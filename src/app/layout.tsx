@@ -27,12 +27,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <body
-              className={
-                inter.className +
-                "min-h-screen pt-[80px] sm:pt-[90px] md:pt-[100px]"
-              }
-            >
+            <body className={inter.className}>
               <Header />
               {children}
             </body>
