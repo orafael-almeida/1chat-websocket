@@ -14,24 +14,55 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MessageCircle, MessageSquare } from "lucide-react";
 import { useState } from "react";
+import io, { Socket } from "socket.io-client";
 
 type UsernameDialogProps = {
-  setUsername: (username: string) => void;
+  setChatVisibility: (status: boolean) => void;
+  setSocket: (socket: Socket) => void;
 };
 
-export function UsernameDialog({ setUsername }: UsernameDialogProps) {
+export function UsernameDialog({
+  setChatVisibility,
+  setSocket,
+}: UsernameDialogProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [modalUsername, setModalUsername] = useState<string>("");
+  const API_URL = `${process.env.NEXT_PUBLIC_API_URL}:${Number(
+    process.env.NEXT_PUBLIC_API_PORT
+  )}`;
 
-  const handleSubmit = () => {
-    setUsername(modalUsername);
-    setOpen(false);
+  const handleUsername = async () => {
+    const usernameExists = localStorage.getItem("username");
+    if (usernameExists) {
+      const socket = await io(API_URL);
+      socket.emit("set_username", usernameExists);
+      setSocket(socket);
+      setChatVisibility(true);
+    } else {
+      setOpen(true);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!modalUsername.trim()) return;
+
+    try {
+      const socket = await io(API_URL);
+      socket.emit("set_username", modalUsername);
+      setSocket(socket);
+      setChatVisibility(true);
+      localStorage.setItem("username", modalUsername);
+      setOpen(false);
+    } catch (error) {
+      console.error("Erro ao conectar ao WebSocket:", error);
+      alert("Falha ao conectar ao chat. Tente novamente.");
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg" className="gap-2" onClick={() => setOpen(true)}>
+        <Button size="lg" className="gap-2" onClick={handleUsername}>
           <MessageSquare className="h-5 w-5" />
           Começar agora
         </Button>

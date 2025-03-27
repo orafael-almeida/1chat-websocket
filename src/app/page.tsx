@@ -3,14 +3,15 @@
 import ChatBox from "@/components/ChatBox";
 import { UsernameDialog } from "@/components/modals/UsernameDialog";
 import { useState } from "react";
+import { Socket } from "socket.io-client";
 
 export default function Home() {
-  const [username, setUsername] = useState<string>("");
-  console.log("Username na HOME: ", username);
+  const [chatVisibility, setChatVisibility] = useState<boolean>(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
   return (
     <div>
-      {username ? (
-        <ChatBox />
+      {chatVisibility ? (
+        <ChatBox socket={socket} />
       ) : (
         <section className="space-y-8 md:py-32 mt-24">
           <div className="flex flex-col items-center text-center space-y-4">
@@ -27,7 +28,10 @@ export default function Home() {
                 de chat em tempo real baseado em WebSockets.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                <UsernameDialog setUsername={setUsername} />
+                <UsernameDialog
+                  setSocket={setSocket}
+                  setChatVisibility={setChatVisibility}
+                />
               </div>
             </div>
           </div>
